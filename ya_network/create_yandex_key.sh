@@ -1,6 +1,4 @@
 #!/bin/bash
-bold_f=$(tput bold)
-default_f=$(tput sgr0)
 printf "Enter your cloud details to generate a temporary Yandex access key.\nThe square brackets (e.g. [default]) indicate the parameters that can be applied by default if you do not enter new ones\n"
 read -p "Enter the SERVICE ACCOUNT ID: " service_account_id
 read -p "Enter the NAME OF DIRECTORY that your service account administers[default]: " folder_name
