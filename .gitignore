@@ -1,3 +1,5 @@
+# IDE files
+**/.vscode-server
 # Local .terraform directories
 **/.terraform/*
 **/.terraform.*
