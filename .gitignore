@@ -31,4 +31,6 @@ override.tf.json
 # example: *tfplan*
 
 **/*key.json
+**/ssh_key*.pem
+# Inventory file is example of Terraform templating 
 **/inventory.ini

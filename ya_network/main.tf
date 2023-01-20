@@ -21,9 +21,15 @@ output "my_current_subnet_data" {
 
 resource "yandex_vpc_subnet" "test" {
   description = "Создание тестовой подсети"
-  # Для примера возьмем значение id из data-ресурса my_primary_vpc_network
+/*
+* В качестве примера возьмем значение network_id из data-ресурса my_primary_vpc_network,
+* а не из заданной в tfvars переменной var.current_network
+*/
   network_id = data.yandex_vpc_network.my_primary_vpc_network.network_id
-  # Зону можно взять из data, т.к. в этом примере она уже вызывалась и совпадает с требуемой зоной ru-central1-a для создания новой подсети
+/*
+# Зону можно взять из data-ресурса, т.к для создания новой подсети будет использована зона ru-central1-a,
+* совпадающая с current_subnet (data-ресурс my_subnet_data) 
+*/
   zone      = data.yandex_vpc_subnet.my_subnet_data.zone
   folder_id = var.my_provider["folder"]
   name      = "work-vm-testnet"
