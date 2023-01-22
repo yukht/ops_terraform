@@ -1,3 +1,4 @@
+/*
 output "srv_instance_data" {
   description = "The parameters of the created virtual machine for use by external modules"
   value = {
@@ -7,14 +8,4 @@ output "srv_instance_data" {
   "Private_address" : yandex_compute_instance.srv.network_interface[0].ip_address
   }
 }
-
-output "srv_subnet_id" {
-  value = yandex_compute_instance.srv.network_interface[0].subnet_id
-}
-output "public_address" {
-  value = yandex_compute_instance.srv.network_interface[0].nat_ip_address
-}
-
-output "private_address" {
-  value = yandex_compute_instance.srv.network_interface[0].ip_address
-}
+*/
