@@ -66,7 +66,6 @@ resource "yandex_compute_instance" "lemp-srv" {
   }
 
   network_interface {
-#    subnet_id = module.network.created_id
     subnet_id = module.network_lemp.created_id
     ip_address = "10.128.1.10"
     nat = "true"
@@ -77,9 +76,7 @@ resource "yandex_compute_instance" "lemp-srv" {
     }
 }
 
-
 ### LAMP ###
-
 
 # Генерировать ssh-ключи
 resource "tls_private_key" "ssh_key_lamp_srv" {
