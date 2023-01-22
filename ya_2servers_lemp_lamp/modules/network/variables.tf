@@ -1,9 +1,3 @@
-variable "provider_settings" {
-  # Variable settings see in credentials.auto.tfvars
-  description = "provider settings"
-  type        = map(string)
-}
-
 variable "network_description" {
   type    = string
 }

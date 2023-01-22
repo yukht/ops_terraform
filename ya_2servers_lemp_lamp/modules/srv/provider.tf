@@ -6,10 +6,3 @@ terraform {
     }
   }
 }
-provider "yandex" {
-  service_account_key_file = file("ya_key.json")
-  cloud_id                 = var.provider_settings["cloud"]
-  folder_id                = var.provider_settings["folder"]
-  zone                     = var.provider_settings["zone"]  # default zone
-}
-

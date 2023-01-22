@@ -1,24 +1,31 @@
-variable "provider_settings" {
-  # Variable settings see in credentials.auto.tfvars
-  description = "provider settings"
-  type        = map(string)
+variable "srv_family" {
+  type    = string
 }
 
-variable "network_description" {
+variable "srv_name" {
   type    = string
 }
-variable "network_name" {
+
+variable "srv_description" {
   type    = string
 }
-variable "network_id" {
+
+variable "srv_zone" {
   type    = string
 }
-variable "folder_id" {
+
+variable "srv_cores" {
+  type    = number
+}
+
+variable "srv_memory" {
+  type    = number
+}
+
+variable "srv_subnet" {
   type    = string
 }
-variable "network_zone" {
+
+variable "srv_ip" {
   type    = string
-}
-variable "network_v4_cidr_blocks" {
-  type    = list
 }
