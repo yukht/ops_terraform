@@ -1,0 +1,3 @@
+# Contains data of the storage access keys
+**/private_bucket_vars.conf
+**/prod_backend.tf
