@@ -1,3 +1,4 @@
+# Redundant code (display info about servers)
 output "srv_instance_data" {
   description = "The parameters of the created virtual machine for use by external modules"
   value = {
@@ -7,7 +8,7 @@ output "srv_instance_data" {
   "Private_address" : yandex_compute_instance.srv.network_interface[0].ip_address
   }
 }
-
+# Redundant code (variables shared for main module)
 output "srv_subnet_id" {
   value = yandex_compute_instance.srv.network_interface[0].subnet_id
 }

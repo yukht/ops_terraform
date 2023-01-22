@@ -5,3 +5,7 @@ output "srv_info" {
     module.srv_lamp.srv_instance_data
     ]
 }
+
+output "lb_target_id" {
+  value = yandex_lb_target_group.lb_target.id
+}

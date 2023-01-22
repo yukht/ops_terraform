@@ -49,8 +49,8 @@ module "srv_lamp" {
 }
 
 # It is difficult to transfer the creation of a target group of servers to a separate module,
-# becauseThe blocks are required, as in the example below:
-resource "yandex_lb_target_group" "lbs_target" {
+# because "target" blocks are required, as in the example below:
+resource "yandex_lb_target_group" "lb_target" {
 #  region_id = "ru-central1"             # Default for Yandex (Moscow and Moscow Region)
   name      = "target-group-web"
   target {
@@ -65,9 +65,17 @@ resource "yandex_lb_target_group" "lbs_target" {
   }
 }
 
+module "lb-web" {
+  source = "./modules/lb"
+  lb_name                 = "lb-web"
+  lb_group_id             = yandex_lb_target_group.lb_target.id
+#  lb_subnet_id            = module.srv_lemp.srv_subnet_id        # only for internal lb
+  depends_on = [yandex_lb_target_group.lb_target]
+}
+
 /*
-module "lbs_target_group" {
-  source  = "./modules/lbs_target"
+module "lb_target_group" {
+  source  = "./modules/lb_target"
   target_name               = "target_group_web"
   target_white_address      = [
     [module.srv_lemp.srv_subnet_id, module.srv_lamp.srv_subnet_id],
