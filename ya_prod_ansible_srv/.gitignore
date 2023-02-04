@@ -32,7 +32,9 @@ override.tf.json
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
 
-**/*key.json
-**/*ssh_key*.pem
 # Inventory file is example of Terraform templating 
 **/inventory.ini
+
+# Keys and addresses
+**/*key.json
+**/server_data/*
