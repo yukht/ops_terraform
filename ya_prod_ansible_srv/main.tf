@@ -178,6 +178,22 @@ module "vm1" {
   srv_nat           = "true" # If you create a balancer, an external address is needed!
 }
 
+data "template_file" "ssh_config_ext" {
+  template = file("${path.module}/templates/.ssh/config_ext.tpl") # local path to template 
+  vars = {
+    public_ip  = module.vm1.public_address
+  }
+}
+
+resource "null_resource" "update_inventory" {
+  triggers = { # apply next block after rendered
+    template = data.template_file.ssh_config_ext.rendered
+  }
+  provisioner "local-exec" { # After rendered run local command 'echo'
+    command = "echo '${data.template_file.ssh_config_ext.rendered}' > server_data/ssh_config_ext"
+  }
+}
+
 # save public ip to file (TODO: replace to template)
 resource "local_file" "srv1_public_ip" {
   content  = module.vm1.public_address
