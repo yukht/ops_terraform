@@ -178,10 +178,12 @@ module "vm1" {
   srv_nat           = "true" # If you create a balancer, an external address is needed!
 }
 
+# Put template code in a separate module to call on demand
 data "template_file" "ssh_config_ext" {
   template = file("${path.module}/templates/.ssh/config_ext.tpl") # local path to template 
   vars = {
-    public_ip  = module.vm1.public_address
+    tplt_vm_name        = "vm1-docker"
+    tplt_public_ip      = module.vm1.public_address
   }
 }
 
@@ -194,13 +196,13 @@ resource "null_resource" "update_inventory" {
   }
 }
 
-# save public ip to file (TODO: replace to template)
+# Save public ip to file (TODO: replace to template)
 resource "local_file" "srv1_public_ip" {
   content  = module.vm1.public_address
   filename = "server_data/vm1_public_ip"
 }
 
-# save private ip to file (TODO: replace to template)
+# Save private ip to file (TODO: replace to template)
 resource "local_file" "srv1_private_ip" {
   content  = module.vm1.private_address
   filename = "server_data/vm1_private_ip"
