@@ -196,6 +196,7 @@ resource "null_resource" "update_inventory" {
   }
 }
 
+/*
 # Save public ip to file (TODO: replace to template)
 resource "local_file" "srv1_public_ip" {
   content  = module.vm1.public_address
@@ -207,6 +208,8 @@ resource "local_file" "srv1_private_ip" {
   content  = module.vm1.private_address
   filename = "server_data/vm1_private_ip"
 }
+
+*/
 
 
 /*
