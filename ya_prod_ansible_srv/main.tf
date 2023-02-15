@@ -187,7 +187,7 @@ data "template_file" "ssh_config_ext" {
   }
 }
 
-resource "null_resource" "update_inventory" {
+resource "null_resource" "update_ssh_config_ext" {
   triggers = { # apply next block after rendered
     template = data.template_file.ssh_config_ext.rendered
   }
@@ -195,6 +195,24 @@ resource "null_resource" "update_inventory" {
     command = "echo '${data.template_file.ssh_config_ext.rendered}' > server_data/ssh_config_ext"
   }
 }
+
+data "template_file" "ssh_connector" {
+  template = file("${path.module}/templates/.ssh/ssh_connector.sh.tpl") # local path to template 
+  vars = {
+    tplt_key_path       = "vm_all-ssh_key_ansible.pem"
+    tplt_public_ip      = module.vm1.public_address
+  }
+}
+
+resource "null_resource" "update_ssh_connector" {
+  triggers = { # apply next block after rendered
+    template = data.template_file.ssh_connector.rendered
+  }
+  provisioner "local-exec" { # After rendered run local command 'echo'
+    command = "echo '${data.template_file.ssh_connector.rendered}' > server_data/ssh_connector.sh && chmod ug+x server_data/ssh_connector.sh"
+  }
+}
+
 
 /*
 # Save public ip to file (TODO: replace to template)
