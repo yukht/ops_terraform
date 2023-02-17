@@ -23,6 +23,7 @@ module "key_vm_all_automation" {
 
 /*
 
+### CASE 1 ###
 # Notice! This example REQUIRES the creation of two users for each new machine. This need is caused by the 'srv' module code! #
  module "key_vm1_default" {
    source  = "./modules/keys"
@@ -148,6 +149,7 @@ resource "local_file" "srv3_private_ip" {
 */
 
 
+### CASE 2 ###
 # TEMPORARY VM1 minimal for docker (active)
 
 module "key_vm1_default" {
@@ -172,17 +174,55 @@ module "vm1" {
   srv_core_fraction = "20"
   srv_cores         = 2
   srv_memory        = 2
-  srv_disk_size     = 10 # Size of the disk in GB
+  srv_disk_size     = 15 # Size of the disk in GB
   srv_subnet        = module.network_ansible.created_id
   srv_ip            = "10.128.1.10"
   srv_nat           = "true" # If you create a balancer, an external address is needed!
 }
 
-# Put template code in a separate module to call on demand
+
+/*
+### CASE 3 ###
+# TEMPORARY VM1 Artifactory Power VM (inactive)
+
+module "key_vm1_default" {
+  source        = "./modules/keys"
+  key_srv_name  = "vm1"
+  key_user_name = "admin"
+}
+
+module "vm1" {
+  source           = "./modules/srv"
+  srv_family       = "ubuntu-2204-lts"                      #
+  srv_default_user = "admin"                                # default ssh user
+  srv_second_user  = "ansible"                              # second ssh user for automation
+  srv_key1         = module.key_vm1_default.ssh_key_v       # default ssh user public key
+  srv_key2         = module.key_vm_all_automation.ssh_key_v # second ssh user public key
+  srv_name         = "vm1"
+  srv_description  = "vm1 docker"
+  srv_zone         = var.my_network["zone_a"] # from networks.auto.tfvars
+  # use standard-v3 for 50% core_fraction and standard-v1 (Intel Broadwell) for minumim server price (with 20% core_fraction) #
+  srv_platform_id   = "standard-v3"
+  srv_core_fraction = "50"
+  srv_cores         = 4
+  srv_memory        = 8
+  srv_disk_size     = 25 # Size of the disk in GB
+  srv_subnet        = module.network_ansible.created_id
+  srv_ip            = "10.128.1.10"
+  srv_nat           = "true" # If you create a balancer, an external address is needed!
+}
+*/
+
+# TODO: Put template code in a separate module to call on demand
+
+#
+# Local config file for manual configuration of IDE and Linux ssh_config
+#
 data "template_file" "ssh_config_ext" {
   template = file("${path.module}/templates/.ssh/config_ext.tpl") # local path to template 
   vars = {
-    tplt_vm_name        = "vm1-docker"
+# tplt_vm_name - VM hostname (in arbitrary form) in this template is used to configure IDE (hostname) and to connection by SSH (ssh_config file)
+    tplt_vm_name        = "vm1-docker"                      
     tplt_public_ip      = module.vm1.public_address
   }
 }
@@ -192,10 +232,16 @@ resource "null_resource" "update_ssh_config_ext" {
     template = data.template_file.ssh_config_ext.rendered
   }
   provisioner "local-exec" { # After rendered run local command 'echo'
+# Export rendered template to directory server_data (filename ssh_config_ext)
     command = "echo '${data.template_file.ssh_config_ext.rendered}' > server_data/ssh_config_ext"
   }
 }
+#
+#
 
+#
+# Local script for connect to created VM
+#
 data "template_file" "ssh_connector" {
   template = file("${path.module}/templates/.ssh/ssh_connector.sh.tpl") # local path to template 
   vars = {
@@ -209,12 +255,16 @@ resource "null_resource" "update_ssh_connector" {
     template = data.template_file.ssh_connector.rendered
   }
   provisioner "local-exec" { # After rendered run local command 'echo'
+# Export rendered template to directory server_data (filename ssh_connector.sh)
     command = "echo '${data.template_file.ssh_connector.rendered}' > server_data/ssh_connector.sh && chmod ug+x server_data/ssh_connector.sh"
   }
 }
-
+#
+#
 
 /*
+
+### NOT USED (use templates) - mark to delete ###
 # Save public ip to file (TODO: replace to template)
 resource "local_file" "srv1_public_ip" {
   content  = module.vm1.public_address
