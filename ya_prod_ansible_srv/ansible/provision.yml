@@ -1,0 +1,9 @@
+---
+- hosts: ansible1
+  gather_facts: no
+  become: true
+  roles:
+    - nginx
+    - install
+
+

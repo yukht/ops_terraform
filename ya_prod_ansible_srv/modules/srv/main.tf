@@ -29,6 +29,9 @@ resource "yandex_compute_instance" "srv" {
     nat = var.srv_nat                           # To create a balancer, an external address is needed (true)
   }
 
+  scheduling_policy {
+    preemptible = true
+  }
 
   metadata = {
     #    ssh-keys = "ubuntu:${file("./ssh_key_ansible1_srv.pub")}"

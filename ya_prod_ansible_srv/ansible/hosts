@@ -1,0 +1,11 @@
+[all:vars]
+ansible_connection=ssh
+ansible_user=ansible
+ansible_ssh_private_key_file=../server_data/vm_all-ssh_key_ansible.pem
+
+# ansible_clients
+[ansible1]
+51.250.75.90
+#10.128.1.10
+
+

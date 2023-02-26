@@ -162,6 +162,7 @@ module "key_vm1_default" {
 module "vm1" {
   source           = "./modules/srv"
   srv_family       = "ubuntu-2204-lts"                      #
+#  srv_family       = "ubuntu-1804-lts"                      #
   srv_default_user = "admin"                                # default ssh user
   srv_second_user  = "ansible"                              # second ssh user for automation
   srv_key1         = module.key_vm1_default.ssh_key_v       # default ssh user public key
@@ -251,17 +252,58 @@ data "template_file" "ssh_connector" {
 }
 
 resource "null_resource" "update_ssh_connector" {
-  triggers = { # apply next block after rendered
+  triggers = {
     template = data.template_file.ssh_connector.rendered
   }
-  provisioner "local-exec" { # After rendered run local command 'echo'
+  provisioner "local-exec" {
 # Export rendered template to directory server_data (filename ssh_connector.sh)
     command = "echo '${data.template_file.ssh_connector.rendered}' > server_data/ssh_connector.sh && chmod ug+x server_data/ssh_connector.sh"
   }
 }
+
+
 #
+# DEPLOY SCRIPTS
 #
 
+# Create hosts file
+data "template_file" "hosts_file" {
+  template = file("${path.module}/templates/hosts.tpl") # local path to template 
+  vars = {
+    tplt_hosts_key_path  = "../${module.key_vm_all_automation.ssh_key_filename_v}"
+    tplt_hosts_username  = "ansible"
+    tplt_hosts_address   = module.vm1.public_address
+  }
+}
+
+resource "null_resource" "create_hosts_file" {
+  triggers = {
+    template = data.template_file.hosts_file.rendered
+  }
+  provisioner "local-exec" {
+    command = "echo '${data.template_file.hosts_file.rendered}' > ansible/hosts"
+  }
+}
+
+# An example from the Internet. Before starting the automation script, it is recommended to check the possibility of connecting by SSH
+resource "null_resource" "run_deploy_scripts" {
+provisioner "remote-exec" {
+    inline = ["sudo apt update"]
+
+    connection {
+      type        = "ssh"
+      host        = module.vm1.public_address
+      user        = "ansible"
+      private_key = "${file(module.key_vm_all_automation.ssh_key_filename_v)}"
+    }
+  }
+# SSH test is completed
+
+# Run the automation script (For any installations. I use Ansible roles)
+  provisioner "local-exec" {
+    command = "cd ansible && ansible-playbook -vv -u ansible -i hosts --private-key '../${module.key_vm_all_automation.ssh_key_filename_v}' provision.yml"
+  }
+}
 /*
 
 ### NOT USED (use templates) - mark to delete ###
