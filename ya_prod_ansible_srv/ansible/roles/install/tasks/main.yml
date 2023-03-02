@@ -9,6 +9,24 @@
     name: gitlab-runner
     update_cache: yes
 
+- name: Create group superusers
+  ansible.builtin.group:
+    name: superusers
+
+- name: Add group superusers to the sudoers and validate before saving
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    state: present
+    insertafter: '^%admin ALL='
+    line: '%superusers ALL=(ALL:ALL) NOPASSWD: ALL'
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Add gitlab-runner to superuser group
+  ansible.builtin.user:
+    name: gitlab-runner
+    groups: superusers
+    append: yes
+
 # - name: Copy Docker and app files
 #   ansible.builtin.copy:
 #     src: files/app

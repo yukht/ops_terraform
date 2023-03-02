@@ -148,9 +148,9 @@ resource "local_file" "srv3_private_ip" {
 }
 */
 
-
+/*
 ### CASE 2 ###
-# TEMPORARY VM1 minimal for docker (active)
+# TEMPORARY VM1 minimal for docker (inactive)
 
 module "key_vm1_default" {
   source        = "./modules/keys"
@@ -180,11 +180,11 @@ module "vm1" {
   srv_ip            = "10.128.1.10"
   srv_nat           = "true" # If you create a balancer, an external address is needed!
 }
+*/
 
 
-/*
 ### CASE 3 ###
-# TEMPORARY VM1 Artifactory Power VM (inactive)
+# TEMPORARY CI gitlab & jenkins Power VM (active)
 
 module "key_vm1_default" {
   source        = "./modules/keys"
@@ -212,7 +212,8 @@ module "vm1" {
   srv_ip            = "10.128.1.10"
   srv_nat           = "true" # If you create a balancer, an external address is needed!
 }
-*/
+
+
 
 # TODO: Put template code in a separate module to call on demand
 
@@ -247,7 +248,7 @@ data "template_file" "ssh_connector" {
   template = file("${path.module}/templates/.ssh/ssh_connector.sh.tpl") # local path to template 
   vars = {
     tplt_key_path       = "vm_all-ssh_key_ansible.pem"
-    tplt_public_ip      = module.vm1.public_address
+    tplt_public_ip      = module.vm1.private_address
   }
 }
 
@@ -270,9 +271,10 @@ resource "null_resource" "update_ssh_connector" {
 data "template_file" "hosts_file" {
   template = file("${path.module}/templates/hosts.tpl") # local path to template 
   vars = {
-    tplt_hosts_key_path  = "../${module.key_vm_all_automation.ssh_key_filename_v}"
-    tplt_hosts_username  = "ansible"
-    tplt_hosts_address   = module.vm1.public_address
+    tplt_hosts_key_path         = "../${module.key_vm_all_automation.ssh_key_filename_v}"
+    tplt_hosts_username         = "ansible"
+    tplt_hosts_address          = module.vm1.private_address
+    tplt_hosts_public_address   = module.vm1.public_address
   }
 }
 
@@ -288,7 +290,7 @@ resource "null_resource" "create_hosts_file" {
 # An example from the Internet. Before starting the automation script, it is recommended to check the possibility of connecting by SSH
 resource "null_resource" "run_deploy_scripts" {
 provisioner "remote-exec" {
-    inline = ["sudo apt update"]
+    inline = ["date"]
 
     connection {
       type        = "ssh"
@@ -301,9 +303,50 @@ provisioner "remote-exec" {
 
 # Run the automation script (For any installations. I use Ansible roles)
   provisioner "local-exec" {
-    command = "cd ansible && ansible-playbook -vv -u ansible -i hosts --private-key '../${module.key_vm_all_automation.ssh_key_filename_v}' provision.yml"
+    command = "cd ansible && ansible-playbook -vvv -u ansible -i hosts --private-key '../${module.key_vm_all_automation.ssh_key_filename_v}' provision.yml"
   }
 }
+
+#
+# // DEPLOY SCRIPTS
+#
+
+
+
+# TEMPORARY VM2 minimal for test docker ci (active)
+
+module "key_vm2_default" {
+  source        = "./modules/keys"
+  key_srv_name  = "vm2"
+  key_user_name = "admin"
+}
+
+
+module "vm2" {
+  source           = "./modules/srv"
+  srv_family       = "ubuntu-2204-lts"                      #
+#  srv_family       = "ubuntu-1804-lts"                      #
+  srv_default_user = "admin"                                # default ssh user
+  srv_second_user  = "ansible"                              # second ssh user for automation
+  srv_key1         = module.key_vm2_default.ssh_key_v       # default ssh user public key
+  srv_key2         = module.key_vm_all_automation.ssh_key_v # second ssh user public key
+  srv_name         = "vm2"
+  srv_description  = "vm2 test"
+  srv_zone         = var.my_network["zone_a"] # from networks.auto.tfvars
+  # use standard-v3 for 50% core_fraction and standard-v1 (Intel Broadwell) for minumim server price (with 20% core_fraction) #
+  srv_platform_id   = "standard-v1"
+  srv_core_fraction = "20"
+  srv_cores         = 2
+  srv_memory        = 2
+  srv_disk_size     = 15 # Size of the disk in GB
+  srv_subnet        = module.network_ansible.created_id
+  srv_ip            = "10.128.1.11"
+  srv_nat           = "true" # If you create a balancer, an external address is needed!
+}
+
+
+
+
 /*
 
 ### NOT USED (use templates) - mark to delete ###

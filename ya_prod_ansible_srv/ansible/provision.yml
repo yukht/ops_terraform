@@ -1,9 +1,9 @@
 ---
 - hosts: ansible1
-  gather_facts: no
+  gather_facts: yes
   become: true
   roles:
-    - nginx
+    # - nginx
+    - docker
+    - gitlab-self-managed
     - install
-
-

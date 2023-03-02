@@ -5,7 +5,9 @@ ansible_ssh_private_key_file=../server_data/vm_all-ssh_key_ansible.pem
 
 # ansible_clients
 [ansible1]
-51.250.75.90
-#10.128.1.10
+10.128.1.10
+#10.128.1.11
 
+[ansible1:vars]
+my_public_address=158.160.61.35
 
