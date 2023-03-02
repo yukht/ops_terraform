@@ -1,7 +1,7 @@
 ---
 # tasks for gitlab-self-managed role
 
-# (access to repositories from the Russian Federation is prohibited)
+# in my case access to repositories is prohibited :(
 # - name: Add GitLab Gitlab-SM repository
 #   ansible.builtin.shell:
 #     cmd: curl -L "https://packages.gitlab.com/install/repositories/gitlab/gitlab-ee/script.deb.sh" | bash
@@ -28,3 +28,7 @@
   ansible.builtin.shell:
     cmd: gitlab-ctl reconfigure
 
+- name: Reload gitlab-runner
+  ansible.builtin.service:
+    name: gitlab-runner
+    state: restarted
